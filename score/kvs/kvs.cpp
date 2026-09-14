@@ -472,6 +472,23 @@ score::ResultBlank Kvs::remove_key(const std::string_view key)
     return result;
 }
 
+score::ResultBlank Kvs::remove_all_keys()
+{
+    score::ResultBlank result = score::MakeUnexpected(ErrorCode::UnmappedError);
+    std::unique_lock<std::mutex> lock(kvs_mutex, std::try_to_lock);
+    if (lock.owns_lock())
+    {
+        kvs.clear();
+        result = score::ResultBlank{};
+    }
+    else
+    {
+        result = score::MakeUnexpected(ErrorCode::MutexLockFailed);
+    }
+
+    return result;
+}
+
 /* Helper: write data to a file and ensure it reaches physical storage.*/
 score::ResultBlank Kvs::write_and_sync(const std::string& path, const void* data, std::size_t size)
 {

@@ -284,6 +284,15 @@ class Kvs final
     score::ResultBlank remove_key(const std::string_view key);
 
     /**
+     * @brief Removes all key-value pairs from the store.
+     *
+     * @return A score::Result object that indicates the success or failure of the operation.
+     *         - On success: Returns a blank score::Result.
+     *         - On failure: Returns an ErrorCode describing the error.
+     */
+    score::ResultBlank remove_all_keys();
+
+    /**
      * @brief Flushes the key-value store, ensuring that all pending changes
      *        are written to the underlying storage.
      *

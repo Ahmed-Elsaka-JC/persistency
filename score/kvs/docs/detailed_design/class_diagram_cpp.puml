@@ -55,6 +55,7 @@ interface IKvs <<interface>> {
     + IsValueDefault(key : string) : Result<bool>
     + SetValue(key : string, value : KvsValue) : ResultBlank
     + RemoveKey(key : string) : ResultBlank
+    + RemoveAllKeys() : ResultBlank
     + Flush() : ResultBlank
     + SnapshotCount() : Result<size_t>
     + SnapshotMaxCount() : size_t
@@ -109,6 +110,7 @@ class KvsMock  <<mock>> {
     + IsValueDefault(key : string) : Result<bool>
     + SetValue(key : string, value : KvsValue) : ResultBlank
     + RemoveKey(key : string) : ResultBlank
+    + RemoveAllKeys() : ResultBlank
     + Flush() : ResultBlank
     + SnapshotCount() : Result<size_t>
     + SnapshotMaxCount() : size_t
@@ -130,6 +132,7 @@ class Kvs <<implementation>> {
     + IsValueDefault(key : string) : Result<bool>
     + SetValue(key : string, value : KvsValue) : ResultBlank
     + RemoveKey(key : string) : ResultBlank
+    + RemoveAllKeys() : ResultBlank
     + Flush() : ResultBlank
     + SnapshotCount() : Result<size_t>
     + SnapshotMaxCount() : size_t

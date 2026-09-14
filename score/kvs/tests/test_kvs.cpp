@@ -1235,3 +1235,91 @@ TEST(kvs_get_filename, get_hashname_failure)
 
     cleanup_environment();
 }
+
+TEST(kvs_remove_all_keys, remove_all_keys_removes_inserted_keys)
+{
+    prepare_environment();
+
+    auto kvs = Kvs::open(instance_id, OpenNeedDefaults::Optional, OpenNeedKvs::Optional, std::string(data_dir));
+    ASSERT_TRUE(kvs);
+
+    /* Insert some test key-value pairs */
+    for (int i = 0; i < 5; i++)
+    {
+        auto set_result = kvs.value().set_value("key" + std::to_string(i), KvsValue(i));
+        EXPECT_TRUE(set_result);
+    }
+
+    /* Remove all keys */
+    auto result = kvs.value().remove_all_keys();
+    EXPECT_TRUE(result);
+
+    /* Verify that all keys are removed */
+    for (int i = 0; i < 5; i++)
+    {
+        auto get_result = kvs.value().get_value("key" + std::to_string(i));
+        EXPECT_FALSE(get_result);
+        EXPECT_EQ(static_cast<ErrorCode>(*get_result.error()), ErrorCode::KeyNotFound);
+    }
+
+    cleanup_environment();
+}
+
+TEST(kvs_remove_all_keys, remove_all_keys_empty_kvs)
+{
+    prepare_environment();
+
+    auto kvs = Kvs::open(instance_id, OpenNeedDefaults::Optional, OpenNeedKvs::Optional, std::string(data_dir));
+    ASSERT_TRUE(kvs);
+
+    kvs.value().kvs.clear();
+
+    /* Removing from an already empty KVS succeeds */
+    auto result = kvs.value().remove_all_keys();
+    EXPECT_TRUE(result);
+    EXPECT_TRUE(kvs.value().kvs.empty());
+
+    cleanup_environment();
+}
+
+TEST(kvs_remove_all_keys, remove_all_keys_keeps_defaults)
+{
+    prepare_environment();
+
+    auto kvs = Kvs::open(instance_id, OpenNeedDefaults::Required, OpenNeedKvs::Required, std::string(data_dir));
+    ASSERT_TRUE(kvs);
+
+    kvs.value().default_values.insert_or_assign("defaulted", KvsValue(42.0));
+    auto set_result = kvs.value().set_value("defaulted", KvsValue(7.0));
+    ASSERT_TRUE(set_result);
+
+    auto result = kvs.value().remove_all_keys();
+    EXPECT_TRUE(result);
+
+    /* Explicit values are gone, defaults are untouched and served instead */
+    EXPECT_TRUE(kvs.value().kvs.empty());
+    EXPECT_TRUE(kvs.value().default_values.count("defaulted"));
+
+    auto get_result = kvs.value().get_value("defaulted");
+    ASSERT_TRUE(get_result);
+    EXPECT_EQ(get_result.value().getType(), KvsValue::Type::f64);
+    EXPECT_DOUBLE_EQ(std::get<double>(get_result.value().getValue()), 42.0);
+
+    cleanup_environment();
+}
+
+TEST(kvs_remove_all_keys, remove_all_keys_failure)
+{
+    prepare_environment();
+
+    /* Mutex locked */
+    auto kvs = Kvs::open(instance_id, OpenNeedDefaults::Required, OpenNeedKvs::Required, std::string(data_dir));
+    ASSERT_TRUE(kvs);
+
+    std::unique_lock<std::mutex> lock(kvs.value().kvs_mutex);
+    auto result = kvs.value().remove_all_keys();
+    EXPECT_FALSE(result);
+    EXPECT_EQ(static_cast<ErrorCode>(*result.error()), ErrorCode::MutexLockFailed);
+
+    cleanup_environment();
+}
