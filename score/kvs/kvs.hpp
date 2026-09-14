@@ -101,6 +101,8 @@ enum class OpenJsonNeedFile
  * - `is_value_default`: Checks if a default value exists for a specific key.
  * - `set_value`: Sets the value for a specific key in the KVS.
  * - `remove_key`: Removes a specific key from the KVS.
+ * - `remove_all_keys`: Removes all keys from the KVS.
+ * - `discard_pending_changes`: Drops all in-memory changes made since the last flush or since open.
  * - `flush`: Flushes the KVS to storage.
  * - `flush_default`: Flushes the default values to storage.
  * - `snapshot_count`: Retrieves the number of available snapshots.
@@ -291,6 +293,23 @@ class Kvs final
      *         - On failure: Returns an ErrorCode describing the error.
      */
     score::ResultBlank remove_all_keys();
+
+    /**
+     * @brief Discards all pending changes to the key-value store.
+     *
+     * Reloads the key-value pairs from persistent storage, dropping every change made since the
+     * last successful `flush()` or - if `flush()` was never called - since `open()`.
+     * Default values are not affected, since they are read-only for this instance.
+     *
+     * A store that was opened without an existing KVS file and never flushed discards to empty.
+     *
+     * @return A score::Result object that indicates the success or failure of the operation.
+     *         - On success: Returns a blank score::Result.
+     *         - On failure: Returns an ErrorCode describing the error. Because the persisted data
+     *           is re-read, this includes storage errors such as `KvsHashFileReadError`,
+     *           `ValidationFailed` and `JsonParserError`.
+     */
+    score::ResultBlank discard_pending_changes();
 
     /**
      * @brief Flushes the key-value store, ensuring that all pending changes

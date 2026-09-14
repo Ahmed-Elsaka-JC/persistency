@@ -26,6 +26,7 @@ interface IKvs {
     set_value
     remove_key
     remove_all_keys
+    discard_pending_changes
     flush
     snapshot_count
     snapshot_max_count

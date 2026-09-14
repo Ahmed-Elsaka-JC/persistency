@@ -489,6 +489,36 @@ score::ResultBlank Kvs::remove_all_keys()
     return result;
 }
 
+/* Drop all in-memory changes by reloading the persisted KVS file */
+score::ResultBlank Kvs::discard_pending_changes()
+{
+    score::ResultBlank result = score::MakeUnexpected(ErrorCode::UnmappedError);
+    std::unique_lock<std::mutex> lock(kvs_mutex, std::try_to_lock);
+    if (lock.owns_lock())
+    {
+        /* Snapshot 0 is the current persisted state: written by flush(), read by open(). */
+        const score::filesystem::Path kvs_path = filename_prefix.Native() + "_0";
+
+        /* Optional: a KVS opened without an existing file and never flushed discards to empty. */
+        auto data_res = open_json(kvs_path, OpenJsonNeedFile::Optional);
+        if (!data_res)
+        {
+            result = score::MakeUnexpected(static_cast<ErrorCode>(*data_res.error()));
+        }
+        else
+        {
+            kvs = std::move(data_res.value());
+            result = score::ResultBlank{};
+        }
+    }
+    else
+    {
+        result = score::MakeUnexpected(ErrorCode::MutexLockFailed);
+    }
+
+    return result;
+}
+
 /* Helper: write data to a file and ensure it reaches physical storage.*/
 score::ResultBlank Kvs::write_and_sync(const std::string& path, const void* data, std::size_t size)
 {

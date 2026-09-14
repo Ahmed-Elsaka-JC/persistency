@@ -1323,3 +1323,133 @@ TEST(kvs_remove_all_keys, remove_all_keys_failure)
 
     cleanup_environment();
 }
+
+TEST(kvs_discard_pending_changes, discard_reverts_to_state_at_open)
+{
+    prepare_environment();
+
+    auto kvs = Kvs::open(instance_id, OpenNeedDefaults::Optional, OpenNeedKvs::Required, std::string(data_dir));
+    ASSERT_TRUE(kvs);
+
+    /* "kvs" is loaded from the test file by prepare_environment() */
+    ASSERT_TRUE(kvs.value().kvs.count("kvs"));
+
+    /* Make pending changes of every kind: add, modify, remove */
+    ASSERT_TRUE(kvs.value().set_value("added", KvsValue(1.0)));
+    ASSERT_TRUE(kvs.value().set_value("kvs", KvsValue(99.0)));
+    ASSERT_TRUE(kvs.value().remove_all_keys());
+
+    auto result = kvs.value().discard_pending_changes();
+    EXPECT_TRUE(result);
+
+    /* Back to what open() loaded */
+    EXPECT_FALSE(kvs.value().kvs.count("added"));
+    ASSERT_TRUE(kvs.value().kvs.count("kvs"));
+    auto get_result = kvs.value().get_value("kvs");
+    ASSERT_TRUE(get_result);
+    EXPECT_EQ(get_result.value().getType(), KvsValue::Type::i32);
+    EXPECT_EQ(std::get<int32_t>(get_result.value().getValue()), 2);
+
+    cleanup_environment();
+}
+
+TEST(kvs_discard_pending_changes, discard_reverts_to_last_flush)
+{
+    prepare_environment();
+
+    auto kvs = Kvs::open(instance_id, OpenNeedDefaults::Optional, OpenNeedKvs::Optional, std::string(data_dir));
+    ASSERT_TRUE(kvs);
+
+    ASSERT_TRUE(kvs.value().remove_all_keys());
+    ASSERT_TRUE(kvs.value().set_value("kept", KvsValue(1.0)));
+    ASSERT_TRUE(kvs.value().flush());
+
+    /* Changes made after the flush are the pending ones */
+    ASSERT_TRUE(kvs.value().set_value("kept", KvsValue(2.0)));
+    ASSERT_TRUE(kvs.value().set_value("pending", KvsValue(3.0)));
+
+    auto result = kvs.value().discard_pending_changes();
+    EXPECT_TRUE(result);
+
+    EXPECT_FALSE(kvs.value().kvs.count("pending"));
+    auto get_result = kvs.value().get_value("kept");
+    ASSERT_TRUE(get_result);
+    EXPECT_DOUBLE_EQ(std::get<double>(get_result.value().getValue()), 1.0);
+
+    cleanup_environment();
+}
+
+TEST(kvs_discard_pending_changes, discard_without_changes_is_noop)
+{
+    prepare_environment();
+
+    auto kvs = Kvs::open(instance_id, OpenNeedDefaults::Optional, OpenNeedKvs::Required, std::string(data_dir));
+    ASSERT_TRUE(kvs);
+
+    const auto keys_before = kvs.value().kvs.size();
+
+    EXPECT_TRUE(kvs.value().discard_pending_changes());
+    EXPECT_EQ(kvs.value().kvs.size(), keys_before);
+
+    /* Repeated calls stay stable */
+    EXPECT_TRUE(kvs.value().discard_pending_changes());
+    EXPECT_EQ(kvs.value().kvs.size(), keys_before);
+
+    cleanup_environment();
+}
+
+
+TEST(kvs_discard_pending_changes, discard_pending_changes_failure)
+{
+    prepare_environment();
+
+    /* Mutex locked */
+    auto kvs = Kvs::open(instance_id, OpenNeedDefaults::Required, OpenNeedKvs::Required, std::string(data_dir));
+    ASSERT_TRUE(kvs);
+
+    std::unique_lock<std::mutex> lock(kvs.value().kvs_mutex);
+    auto result = kvs.value().discard_pending_changes();
+    EXPECT_FALSE(result);
+    EXPECT_EQ(static_cast<ErrorCode>(*result.error()), ErrorCode::MutexLockFailed);
+
+    cleanup_environment();
+}
+
+TEST(kvs_discard_pending_changes, discard_without_persisted_file_yields_empty)
+{
+    prepare_environment();
+
+    /* No KVS file: opened as Optional and never flushed */
+    system(("rm -rf " + kvs_prefix + ".json").c_str());
+    system(("rm -rf " + kvs_prefix + ".hash").c_str());
+
+    auto kvs = Kvs::open(instance_id, OpenNeedDefaults::Optional, OpenNeedKvs::Optional, std::string(data_dir));
+    ASSERT_TRUE(kvs);
+
+    ASSERT_TRUE(kvs.value().set_value("pending", KvsValue(1.0)));
+
+    EXPECT_TRUE(kvs.value().discard_pending_changes());
+    EXPECT_TRUE(kvs.value().kvs.empty());
+
+    cleanup_environment();
+}
+
+TEST(kvs_discard_pending_changes, discard_reports_corrupted_storage)
+{
+    prepare_environment();
+
+    auto kvs = Kvs::open(instance_id, OpenNeedDefaults::Optional, OpenNeedKvs::Required, std::string(data_dir));
+    ASSERT_TRUE(kvs);
+
+    /* Corrupt the hash of the persisted file after opening */
+    std::fstream corrupt_hash_file(kvs_prefix + ".hash", std::ios::in | std::ios::out | std::ios::binary);
+    corrupt_hash_file.seekp(0);
+    corrupt_hash_file.put(0xFF);
+    corrupt_hash_file.close();
+
+    auto result = kvs.value().discard_pending_changes();
+    EXPECT_FALSE(result);
+    EXPECT_EQ(static_cast<ErrorCode>(*result.error()), ErrorCode::ValidationFailed);
+
+    cleanup_environment();
+}
