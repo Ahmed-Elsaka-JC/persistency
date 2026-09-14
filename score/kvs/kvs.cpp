@@ -14,6 +14,7 @@
 #include "internal/kvs_helper.hpp"
 #include <unistd.h>  // fileno(), fdatasync()
 #include <cstdio>    // std::fopen, std::fwrite, std::fflush, std::fclose
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -857,6 +858,32 @@ score::Result<score::filesystem::Path> Kvs::get_hash_filename(const SnapshotId& 
         result = score::MakeUnexpected(static_cast<ErrorCode>(*fname_exists_res.error()));
     }
     return result;
+}
+
+/* Get the combined on-disk size of the current KVS data and hash files */
+score::Result<size_t> Kvs::get_storage_file_size() const
+{
+    const std::array<score::filesystem::Path, 2> paths{
+        score::filesystem::Path{filename_prefix.Native() + "_0.json"},
+        score::filesystem::Path{filename_prefix.Native() + "_0.hash"}};
+
+    size_t total_size = 0;
+    for (const auto& path : paths)
+    {
+        std::error_code ec;
+        const auto size = std::filesystem::file_size(path.CStr(), ec);
+        if (!ec)
+        {
+            total_size += static_cast<size_t>(size);
+        }
+        else if (ec != std::errc::no_such_file_or_directory)
+        {
+            logger->LogError() << "error: could not determine size of " << path << ": " << ec.message();
+            return score::MakeUnexpected(ErrorCode::PhysicalStorageFailure);
+        }
+    }
+
+    return total_size;
 }
 
 } /* namespace score::mw::per::kvs */

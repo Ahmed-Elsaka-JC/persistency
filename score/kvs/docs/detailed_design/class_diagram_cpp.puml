@@ -61,6 +61,7 @@ interface IKvs <<interface>> {
     + SnapshotCount() : Result<size_t>
     + SnapshotMaxCount() : size_t
     + SnapshotRestore(snapshot_id : SnapshotId) : ResultBlank
+    + GetStorageFileSize() : Result<size_t>
 }
 
 IKvsBackend -[hidden]right- IKvs
@@ -117,6 +118,7 @@ class KvsMock  <<mock>> {
     + SnapshotCount() : Result<size_t>
     + SnapshotMaxCount() : size_t
     + SnapshotRestore(snapshot_id : SnapshotId) : ResultBlank
+    + GetStorageFileSize() : Result<size_t>
 }
 
 class Kvs <<implementation>> {
@@ -140,6 +142,7 @@ class Kvs <<implementation>> {
     + SnapshotCount() : Result<size_t>
     + SnapshotMaxCount() : size_t
     + SnapshotRestore(snapshot_id : SnapshotId) : ResultBlank
+    + GetStorageFileSize() : Result<size_t>
 }
 
 ' Relationships

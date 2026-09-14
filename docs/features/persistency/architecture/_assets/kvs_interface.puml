@@ -31,6 +31,7 @@ interface IKvs {
     snapshot_count
     snapshot_max_count
     snapshot_restore
+    get_storage_file_size
 }
 
 @enduml

@@ -110,6 +110,7 @@ enum class OpenJsonNeedFile
  * - `snapshot_restore`: Restores the KVS from a specified snapshot.
  * - `get_kvs_filename`: Retrieves the filename (path) associated with a snapshot.
  * - `get_hash_filename`: Retrieves the hashname (path) associated with a snapshot.
+ * - `get_storage_file_size`: Retrieves the size in bytes of the persisted KVS data and hash files.
  *
  * Private Methods:
  * - `snapshot_rotate`: Rotates the snapshots, ensuring that the maximum count is maintained.
@@ -379,6 +380,23 @@ class Kvs final
      *         - On failure: An error code describing the reason for the failure.
      */
     score::Result<score::filesystem::Path> get_hash_filename(const SnapshotId& snapshot_id) const;
+
+    /**
+     * @brief Retrieves the size of the persisted key-value store on disk.
+     *
+     * Returns the combined size in bytes of the current KVS data file and its hash file
+     * (snapshot 0). Rotated snapshots and the defaults files are not included.
+     *
+     * Since the size is read from storage, it reflects the last successful `flush()` and not
+     * any pending in-memory changes. A file that does not exist contributes zero, so a store
+     * that was never flushed reports a size of 0 instead of an error.
+     *
+     * @return A score::Result object that indicates the success or failure of the operation.
+     *         - On success: The combined size of both files in bytes.
+     *         - On failure: `ErrorCode::PhysicalStorageFailure` if a file exists but its size
+     *           cannot be determined.
+     */
+    score::Result<size_t> get_storage_file_size() const;
 
   private:
     /* Private constructor to prevent direct instantiation */

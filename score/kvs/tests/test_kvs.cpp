@@ -1453,3 +1453,80 @@ TEST(kvs_discard_pending_changes, discard_reports_corrupted_storage)
 
     cleanup_environment();
 }
+
+TEST(kvs_get_storage_file_size, size_matches_files_on_disk)
+{
+    prepare_environment();
+
+    auto kvs = Kvs::open(instance_id, OpenNeedDefaults::Optional, OpenNeedKvs::Required, std::string(data_dir));
+    ASSERT_TRUE(kvs);
+
+    const auto expected =
+        std::filesystem::file_size(kvs_prefix + ".json") + std::filesystem::file_size(kvs_prefix + ".hash");
+
+    auto result = kvs.value().get_storage_file_size();
+    ASSERT_TRUE(result);
+    EXPECT_EQ(result.value(), expected);
+
+    cleanup_environment();
+}
+
+TEST(kvs_get_storage_file_size, size_without_files_is_zero)
+{
+    prepare_environment();
+
+    system(("rm -rf " + kvs_prefix + ".json").c_str());
+    system(("rm -rf " + kvs_prefix + ".hash").c_str());
+
+    auto kvs = Kvs::open(instance_id, OpenNeedDefaults::Optional, OpenNeedKvs::Optional, std::string(data_dir));
+    ASSERT_TRUE(kvs);
+
+    auto result = kvs.value().get_storage_file_size();
+    ASSERT_TRUE(result);
+    EXPECT_EQ(result.value(), 0U);
+
+    cleanup_environment();
+}
+
+TEST(kvs_get_storage_file_size, size_reflects_storage_not_pending_changes)
+{
+    prepare_environment();
+
+    system(("rm -rf " + kvs_prefix + ".json").c_str());
+    system(("rm -rf " + kvs_prefix + ".hash").c_str());
+
+    auto kvs = Kvs::open(instance_id, OpenNeedDefaults::Optional, OpenNeedKvs::Optional, std::string(data_dir));
+    ASSERT_TRUE(kvs);
+
+    /* Unflushed changes are invisible to the size query */
+    ASSERT_TRUE(kvs.value().set_value("pending", KvsValue(1.0)));
+    auto before = kvs.value().get_storage_file_size();
+    ASSERT_TRUE(before);
+    EXPECT_EQ(before.value(), 0U);
+
+    ASSERT_TRUE(kvs.value().flush());
+
+    auto after = kvs.value().get_storage_file_size();
+    ASSERT_TRUE(after);
+    EXPECT_GT(after.value(), 0U);
+
+    cleanup_environment();
+}
+
+TEST(kvs_get_storage_file_size, size_failure_unreadable_path)
+{
+    prepare_environment();
+
+    auto kvs = Kvs::open(instance_id, OpenNeedDefaults::Optional, OpenNeedKvs::Optional, std::string(data_dir));
+    ASSERT_TRUE(kvs);
+
+    /* A directory in place of the data file cannot be sized as a regular file */
+    system(("rm -rf " + kvs_prefix + ".json").c_str());
+    std::filesystem::create_directory(kvs_prefix + ".json");
+
+    auto result = kvs.value().get_storage_file_size();
+    EXPECT_FALSE(result);
+    EXPECT_EQ(static_cast<ErrorCode>(*result.error()), ErrorCode::PhysicalStorageFailure);
+
+    cleanup_environment();
+}
