@@ -162,15 +162,6 @@ impl KvsApi for Kvs {
                     Err(ErrorCode::ConversionFailed)
                 },
             }
-        } else if let Some(value) = data.defaults_map.get(key) {
-            // check if key has a default value
-            match T::try_from(value) {
-                Ok(value) => Ok(value),
-                Err(err) => {
-                    error!("Failed to convert default value: {:#?}", err);
-                    Err(ErrorCode::ConversionFailed)
-                },
-            }
         } else {
             error!("Key not found: {}", key);
             Err(ErrorCode::KeyNotFound)
@@ -411,7 +402,9 @@ mod kvs_tests {
 
         kvs.reset().unwrap();
         assert_eq!(kvs.get_all_keys().unwrap().len(), 0);
-        assert_eq!(kvs.get_value_as::<String>("example1").unwrap(), "default_value");
+        assert!(kvs
+            .get_value_as::<String>("example1")
+            .is_err_and(|e| e == ErrorCode::KeyNotFound));
         assert!(kvs
             .get_value_as::<bool>("example2")
             .is_err_and(|e| e == ErrorCode::KeyNotFound));
@@ -430,7 +423,9 @@ mod kvs_tests {
         );
 
         kvs.reset_key("example1").unwrap();
-        assert_eq!(kvs.get_value_as::<String>("example1").unwrap(), "default_value");
+        assert!(kvs
+            .get_value_as::<String>("example1")
+            .is_err_and(|e| e == ErrorCode::KeyNotFound));
 
         // TODO: determine why resetting entry without default value is an error.
         assert!(kvs
@@ -514,10 +509,7 @@ mod kvs_tests {
             KvsMap::from([("example1".to_string(), KvsValue::from("default_value"))]),
         );
 
-        assert_eq!(
-            kvs.get_value("example1").unwrap(),
-            KvsValue::String("default_value".to_string())
-        );
+        assert!(kvs.get_value("example1").is_err_and(|e| e == ErrorCode::KeyNotFound));
     }
 
     #[test]
@@ -554,8 +546,9 @@ mod kvs_tests {
             KvsMap::from([("example1".to_string(), KvsValue::from("default_value"))]),
         );
 
-        let value = kvs.get_value_as::<String>("example1").unwrap();
-        assert_eq!(value, "default_value");
+        assert!(kvs
+            .get_value_as::<String>("example1")
+            .is_err_and(|e| e == ErrorCode::KeyNotFound));
     }
 
     #[test]
@@ -597,7 +590,7 @@ mod kvs_tests {
 
         assert!(kvs
             .get_value_as::<f64>("example1")
-            .is_err_and(|e| e == ErrorCode::ConversionFailed));
+            .is_err_and(|e| e == ErrorCode::KeyNotFound));
     }
 
     #[test]
