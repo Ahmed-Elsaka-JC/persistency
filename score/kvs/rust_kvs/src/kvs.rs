@@ -112,9 +112,6 @@ impl KvsApi for Kvs {
 
     /// Get the assigned value for a given key
     ///
-    /// # Features
-    ///   * `FEAT_REQ__KVS__default_values`
-    ///
     /// # Parameters
     ///   * `key`: Key to retrieve the value from
     ///
@@ -136,9 +133,6 @@ impl KvsApi for Kvs {
     ///
     /// See [Variants](https://docs.rs/tinyjson/latest/tinyjson/enum.JsonValue.html#variants) for
     /// supported value types.
-    ///
-    /// # Features
-    ///   * `FEAT_REQ__KVS__default_values`
     ///
     /// # Parameters
     ///   * `key`: Key to retrieve the value from
