@@ -69,7 +69,7 @@ Component Requirements
    :id: comp_req__kvs__multi_instance
    :reqtype: Functional
    :security: NO
-   :safety: ASIL_B
+   :safety: QM
    :derived_from: feat_req__persistency__multiple_kvs[version==1]
    :status: valid
    :version: 1
@@ -342,7 +342,9 @@ Component Requirements
    :tags: inspected
 
    The component shall provide an API to reset a value to its default when a default value is defined.
-   The default value can be retrieved via the ``get_default_value`` API.
+
+   .. note::
+      The default value can be retrieved via the ``get_default_value`` API.
 
 .. comp_req:: Default Value Datatypes
    :id: comp_req__kvs__default_value_types
@@ -355,8 +357,7 @@ Component Requirements
    :satisfied_by: comp__persistency_kvs[version==1]
    :tags: inspected
 
-   The component shall accept default values of only permitted value data
-   types.
+   The component shall accept default values of only the value data types specified in :need:`comp_req__kvs__value_data_types`.
 
 .. comp_req:: Default Value Query
    :id: comp_req__kvs__default_value_query
@@ -436,10 +437,10 @@ Component Requirements
    :satisfied_by: comp__persistency_kvs[version==1]
    :tags: inspected
 
-   When the storage cannot be loaded, the component shall behave according to the ``Need_Kvs`` configuration parameter (represented by the ``OpenNeedKvs`` flag):
+   The component shall behave according to the ``Need Kvs`` configuration parameter (represented by the ``OpenNeedKvs`` flag) when opening a KVS instance whose storage is missing or fails the integrity check:
 
    - ``Required``: the component shall report an error;
-   - ``Optional``: the component shall report an error when the storage file exists but is corrupted, and shall open the KVS instance with an empty storage when no storage file exists;
+   - ``Optional``: the component shall report an error when the storage file exists but fails the integrity check, and shall open the KVS instance with an empty storage when no storage file exists;
    - ``Ignore``: the component shall open the KVS instance with an empty storage.
 
 .. comp_req:: Recovery via Snapshot Restore
@@ -532,7 +533,7 @@ Component Requirements
    :satisfied_by: comp__persistency_kvs[version==1]
    :tags: inspected
 
-   The component shall verify the checksum when loading data.
+   The component shall verify the checksum when loading data, and shall report an error and not load the affected data when the checksum does not match.
 
 .. comp_req:: Persistent Data Storage Backend
    :id: comp_req__kvs__pers_data_store_bnd
@@ -613,7 +614,7 @@ Component Requirements
    The component shall provide an API for creating snapshots.
    The API shall accept an argument that selects a snapshot slot by index.
    The snapshot slot shall be in range ``<1..3>``.
-   The API should return an error when provided slot index is out of range or provided slot index is zero.
+   The API shall return an error when provided slot index is out of range or provided slot index is zero.
    See :need:`comp_req__kvs__snapshot_max_num_cfg`.
 
 
@@ -699,7 +700,7 @@ Component Requirements
    :tags: valid
 
    The component shall provide an API to check whether a slot identified by a snapshot index is free or occupied.
-   The API should return an error when provided slot index is out of range. See :need:`comp_req__kvs__snapshot_create_api`.
+   The API shall return an error when provided slot index is out of range. See :need:`comp_req__kvs__snapshot_create_api`.
 
 .. comp_req:: Snapshot Creation
    :id: comp_req__kvs__snapshot_creation
@@ -749,7 +750,7 @@ Component Requirements
    The component shall provide an API for restoring snapshots.
    The API shall accept an argument that selects a snapshot slot by index.
    The function shall return an error when the referenced snapshot slot is free.
-   The API should return an error when provided slot index is out of range. See :need:`comp_req__kvs__snapshot_create_api`.
+   The API shall return an error when provided slot index is out of range. See :need:`comp_req__kvs__snapshot_create_api`.
 
 .. comp_req:: Snapshot Restore
    :id: comp_req__kvs__snapshot_restore
@@ -782,7 +783,7 @@ Component Requirements
    The component shall provide an API for removing snapshots.
    The API shall accept an argument that selects a snapshot slot by index.
    The function shall return an error when the referenced slot is free.
-   The API should return an error when provided slot index is out of range. See :need:`comp_req__kvs__snapshot_create_api`.
+   The API shall return an error when provided slot index is out of range. See :need:`comp_req__kvs__snapshot_create_api`.
 
 .. comp_req:: Snapshot Rotation
    :id: comp_req__kvs__snapshot_rotate
@@ -901,8 +902,8 @@ Component Requirements
 
    The component shall provide a tool to generate the default value storage file and its corresponding checksum file.
 
-.. comp_req:: Default Value Config tool validation
-   :id: comp_req__kvs__default_value_cfg_tool_validation
+.. comp_req:: Storage Tool
+   :id: comp_req__kvs__storage_tool
    :reqtype: Functional
    :security: NO
    :safety: ASIL_B
