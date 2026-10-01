@@ -192,23 +192,6 @@ Component Requirements
    A non-zero value shall specify the maximum number of snapshots.
    Default value shall be: ``3``.
 
-.. comp_req:: Snapshot Maximum Number
-   :id: comp_req__kvs__snapshot_max_num
-   :reqtype: Functional
-   :security: YES
-   :safety: ASIL_B
-   :derived_from: feat_req__persistency__cfg[version==2]
-   :status: invalid
-   :version: 1
-   :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
-
-   The component shall maintain a configurable maximum number of snapshots.
-
-   .. note::
-
-      This requirement is invalid after change of snapshot handling (see #436)
-
 .. comp_req:: Key Naming
    :id: comp_req__kvs__key_naming
    :reqtype: Functional
@@ -300,22 +283,6 @@ Component Requirements
    :tags: inspected
 
    The component shall serialize and deserialize all values to and from JSON.
-
-.. comp_req:: Value Length
-   :id: comp_req__kvs__value_length
-   :reqtype: Functional
-   :security: NO
-   :safety: ASIL_B
-   :derived_from: feat_req__persistency__support_datatype_value[version==1]
-   :status: invalid
-   :version: 1
-   :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
-
-   The component shall limit the maximum length of a value to 1024 bytes.
-
-   .. note::
-      This requirement will not be implemented.
 
 .. comp_req:: Value Default
    :id: comp_req__kvs__value_default
@@ -702,40 +669,6 @@ Component Requirements
    The component shall provide an API to check whether a slot identified by a snapshot index is free or occupied.
    The API shall return an error when provided slot index is out of range. See :need:`comp_req__kvs__snapshot_create_api`.
 
-.. comp_req:: Snapshot Creation
-   :id: comp_req__kvs__snapshot_creation
-   :reqtype: Functional
-   :security: NO
-   :safety: ASIL_B
-   :derived_from: feat_req__persistency__snapshot_create[version==1]
-   :status: invalid
-   :version: 1
-   :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
-
-   The component shall create a snapshot each time data is stored.
-
-   .. note::
-
-      This requirement is invalid after change of snapshot handling (see #436)
-
-.. comp_req:: Snapshot IDs
-   :id: comp_req__kvs__snapshot_id
-   :reqtype: Functional
-   :security: NO
-   :safety: ASIL_B
-   :derived_from: feat_req__persistency__snapshot_create[version==1]
-   :status: invalid
-   :version: 1
-   :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
-
-   The component shall assign the ID 1 to the newest snapshot and shall increment the IDs of older snapshots accordingly.
-
-   .. note::
-
-      This requirement is invalid after change of snapshot handling (see #436)
-
 .. comp_req:: Snapshot Restore API
    :id: comp_req__kvs__snapshot_restore_api
    :reqtype: Functional
@@ -751,23 +684,6 @@ Component Requirements
    The API shall accept an argument that selects a snapshot slot by index.
    The function shall return an error when the referenced snapshot slot is free.
    The API shall return an error when provided slot index is out of range. See :need:`comp_req__kvs__snapshot_create_api`.
-
-.. comp_req:: Snapshot Restore
-   :id: comp_req__kvs__snapshot_restore
-   :reqtype: Functional
-   :security: NO
-   :safety: ASIL_B
-   :derived_from: feat_req__persistency__snapshot_restore[version==1]
-   :status: invalid
-   :version: 1
-   :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
-
-   The component shall allow restoration of a snapshot by its ID.
-
-   .. note::
-
-      This requirement is invalid after change of snapshot handling (see #436)
 
 .. comp_req:: Snapshot Remove API
    :id: comp_req__kvs__snapshot_remove_api
@@ -785,39 +701,6 @@ Component Requirements
    The function shall return an error when the referenced slot is free.
    The API shall return an error when provided slot index is out of range. See :need:`comp_req__kvs__snapshot_create_api`.
 
-.. comp_req:: Snapshot Rotation
-   :id: comp_req__kvs__snapshot_rotate
-   :reqtype: Functional
-   :security: NO
-   :safety: ASIL_B
-   :derived_from: feat_req__persistency__snapshot_remove[version==1],feat_req__persistency__snapshot_restore[version==1]
-   :status: invalid
-   :version: 1
-   :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
-
-   The component shall rotate and delete the oldest snapshot when the maximum number is reached.
-
-   .. note::
-
-      This requirement is invalid after change of snapshot handling (see #436)
-
-.. comp_req:: Snapshot Deletion
-   :id: comp_req__kvs__snapshot_delete
-   :reqtype: Functional
-   :security: NO
-   :safety: ASIL_B
-   :derived_from: feat_req__persistency__snapshot_remove[version==1]
-   :status: invalid
-   :version: 1
-   :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
-
-   The component shall allow deletion of individual snapshots.
-
-   .. note::
-
-      This requirement is invalid after change of snapshot handling (see #436)
 
 .. comp_req:: Concurrency
    :id: comp_req__kvs__concurrency
@@ -914,40 +797,6 @@ Component Requirements
    :tags: inspected
 
    The component shall provide a tool to view, modify and validate storage files.
-
-.. comp_req:: Engineering Mode
-   :id: comp_req__kvs__eng_mode
-   :reqtype: Functional
-   :security: YES
-   :safety: ASIL_B
-   :derived_from: feat_req__persistency__dev_mode[version==1]
-   :status: invalid
-   :version: 1
-   :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
-
-   The component shall provide an engineering mode that can be enabled during
-   build time to display debugging and internal information.
-
-   .. note::
-      This requirement will not be implemented and in development mode you can change logLevel to kDebug.
-
-.. comp_req:: Field Mode
-   :id: comp_req__kvs__field_mode
-   :reqtype: Functional
-   :security: YES
-   :safety: ASIL_B
-   :derived_from: feat_req__persistency__prod_mode[version==1]
-   :status: invalid
-   :version: 1
-   :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
-
-   The component shall provide a field mode that can be enabled during build
-   time to restrict access as much as possible.
-
-   .. note::
-      This requirement will not be implemented and in production mode you can change logLevel to kInfo.
 
 
 Assumption of Use Requirements
