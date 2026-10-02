@@ -257,6 +257,42 @@ Component Requirements
 
    The component shall limit the maximum length of a key to 32 bytes.
 
+.. comp_req:: Key Existence Check
+   :id: comp_req__kvs__key_exists_api
+   :reqtype: Functional
+   :security: NO
+   :safety: ASIL_B
+   :derived_from: feat_req__persistency__support_datatype_keys[version==1],feat_req__persistency__cached_access[version==1]
+   :status: valid
+   :version: 1
+   :satisfied_by: comp__persistency_kvs[version==1]
+
+   The component shall provide a capability to report whether a key has been explicitly written, returning ``false`` for a key that was never written even if a default value is available for it.
+
+.. comp_req:: Key Listing
+   :id: comp_req__kvs__key_list_api
+   :reqtype: Functional
+   :security: NO
+   :safety: ASIL_B
+   :derived_from: feat_req__persistency__support_datatype_keys[version==1],feat_req__persistency__cached_access[version==1]
+   :status: valid
+   :version: 1
+   :satisfied_by: comp__persistency_kvs[version==1]
+
+   The component shall provide a capability to retrieve the set of keys that have been explicitly written, excluding keys that only have a default value.
+
+.. comp_req:: Key Removal
+   :id: comp_req__kvs__key_remove_api
+   :reqtype: Functional
+   :security: NO
+   :safety: ASIL_B
+   :derived_from: feat_req__persistency__support_datatype_keys[version==1],feat_req__persistency__cached_access[version==1]
+   :status: valid
+   :version: 1
+   :satisfied_by: comp__persistency_kvs[version==1]
+
+   The component shall provide a capability to delete a single explicitly-written key-value pair from the in-memory cache.
+
 .. comp_req:: Value Data Types
    :id: comp_req__kvs__value_data_types
    :reqtype: Functional
@@ -270,6 +306,30 @@ Component Requirements
 
    The component shall accept only values of the following data types: Number,
    String, Boolean, Null, Array[Value], or Dictionary{Key:Value}.
+
+.. comp_req:: Value Retrieval
+   :id: comp_req__kvs__value_get_api
+   :reqtype: Functional
+   :security: NO
+   :safety: ASIL_B
+   :derived_from: feat_req__persistency__support_datatype_value[version==1],feat_req__persistency__cached_access[version==1]
+   :status: valid
+   :version: 1
+   :satisfied_by: comp__persistency_kvs[version==1]
+
+   The component shall provide a capability to retrieve the in-memory value associated with a key, returning the default value (see :need:`comp_req__kvs__value_default`) when the key has not been explicitly written.
+
+.. comp_req:: Value Store
+   :id: comp_req__kvs__value_set_api
+   :reqtype: Functional
+   :security: NO
+   :safety: ASIL_B
+   :derived_from: feat_req__persistency__support_datatype_value[version==1],feat_req__persistency__cached_access[version==1]
+   :status: valid
+   :version: 1
+   :satisfied_by: comp__persistency_kvs[version==1]
+
+   The component shall provide a capability to store a value for a given key in the in-memory cache, overwriting any previously written value for that key (see :need:`comp_req__kvs__key_value_overwrite`).
 
 .. comp_req:: Value Serialization
    :id: comp_req__kvs__value_serialize
@@ -338,6 +398,18 @@ Component Requirements
    :tags: inspected
 
    The component shall provide an API to retrieve default values even if value is set by the user.
+
+.. comp_req:: Default Value Status Query
+   :id: comp_req__kvs__default_value_is_default_api
+   :reqtype: Functional
+   :security: NO
+   :safety: ASIL_B
+   :derived_from: feat_req__persistency__default_values[version==1],feat_req__persistency__default_value_get[version==1]
+   :status: valid
+   :version: 1
+   :satisfied_by: comp__persistency_kvs[version==1]
+
+   The component shall provide a capability to report whether a key has not been explicitly written and a default value is available for it.
 
 .. comp_req:: Default Value Config
    :id: comp_req__kvs__default_value_cfg
@@ -474,6 +546,30 @@ Component Requirements
    :tags: inspected
 
    The component shall hold key-value pairs in an in-memory cache and shall serve read and write access to key-value pairs from that cache.
+
+.. comp_req:: Store Reset
+   :id: comp_req__kvs__store_reset_api
+   :reqtype: Functional
+   :security: NO
+   :safety: ASIL_B
+   :derived_from: feat_req__persistency__cached_access[version==1]
+   :status: valid
+   :version: 1
+   :satisfied_by: comp__persistency_kvs[version==1]
+
+   The component shall provide a capability to remove all explicitly-written key-value pairs from the in-memory cache, restoring the KVS instance to its initial, empty state.
+
+.. comp_req:: Discard Pending Changes
+   :id: comp_req__kvs__discard_pending_changes_api
+   :reqtype: Functional
+   :security: NO
+   :safety: ASIL_B
+   :derived_from: feat_req__persistency__load_data[version==1],feat_req__persistency__cached_access[version==1]
+   :status: valid
+   :version: 1
+   :satisfied_by: comp__persistency_kvs[version==1]
+
+   The component shall provide a capability to reload key-value pairs from persistent storage, discarding every in-memory change made since the last successful flush operation (or since open, if flush was never called), without affecting default values.
 
 .. comp_req:: Persistent Data Storage Checksum Write
    :id: comp_req__kvs__pers_data_csum
