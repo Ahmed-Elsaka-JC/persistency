@@ -40,7 +40,6 @@ class MaxSnapshotsScenario(CommonScenario):
 
 
 @add_test_properties(
-    partially_verifies=["comp_req__kvs__snapshot_creation"],
     test_type="requirements-based",
     derivation_technique="requirements-analysis",
 )
@@ -88,7 +87,6 @@ class TestSnapshotCountFirstFlush(MaxSnapshotsScenario):
 
 
 @add_test_properties(
-    partially_verifies=["comp_req__kvs__snapshot_creation"],
     test_type="requirements-based",
     derivation_technique="requirements-analysis",
 )
@@ -108,7 +106,6 @@ class TestSnapshotCountFull(TestSnapshotCountFirstFlush):
 
 
 @add_test_properties(
-    partially_verifies=["comp_req__kvs__snapshot_max_num"],
     test_type="inspection",
     derivation_technique="boundary-values",
 )
@@ -146,11 +143,7 @@ class TestSnapshotMaxCount(MaxSnapshotsScenario):
 
 
 @add_test_properties(
-    fully_verifies=["comp_req__kvs__snapshot_restore"],
-    partially_verifies=[
-        "comp_req__kvs__snapshot_creation",
-        "comp_req__kvs__snapshot_rotate",
-    ],
+
     test_type="control-flow-analysis",
     derivation_technique="requirements-analysis",
 )
@@ -191,7 +184,6 @@ class TestSnapshotRestorePrevious(MaxSnapshotsScenario):
 
 
 @add_test_properties(
-    partially_verifies=["comp_req__kvs__snapshot_creation"],
     test_type="fault-injection",
     derivation_technique="requirements-analysis",
 )
@@ -227,10 +219,7 @@ class TestSnapshotRestoreCurrent(CommonScenario):
 
 
 @add_test_properties(
-    partially_verifies=[
-        "comp_req__kvs__snapshot_creation",
-        "comp_req__kvs__snapshot_restore",
-    ],
+
     test_type="fault-injection",
     derivation_technique="requirements-analysis",
 )
@@ -261,7 +250,6 @@ class TestSnapshotRestoreNonexistent(CommonScenario):
 
 
 @add_test_properties(
-    partially_verifies=["comp_req__kvs__snapshot_creation"],
     test_type="interface-test",
     derivation_technique="requirements-analysis",
 )
@@ -297,7 +285,6 @@ class TestSnapshotPathsExist(CommonScenario):
 
 
 @add_test_properties(
-    partially_verifies=["comp_req__kvs__snapshot_creation"],
     test_type="fault-injection",
     derivation_technique="requirements-analysis",
 )
