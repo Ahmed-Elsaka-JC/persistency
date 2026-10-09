@@ -22,6 +22,7 @@ pytestmark = pytest.mark.parametrize("version", ["rust"], scope="class")
 
 
 @add_test_properties(
+    fully_verifies=["comp_req__kvs__persist_data_com"],
     test_type="requirements-based",
     derivation_technique="requirements-analysis",
 )
