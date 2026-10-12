@@ -50,7 +50,7 @@ Component Requirements
    :satisfied_by: comp__persistency_kvs[version==1]
    :tags: inspected
 
-   The component shall access operating system services exclusively through an abstraction layer and shall not depend on any specific operating system.
+   The component shall access operating system services exclusively through an operating system abstraction layer.
 
 .. comp_req:: No Dynamic Memory Allocation at Runtime
    :id: comp_req__kvs__no_dynamic_memory
@@ -63,7 +63,7 @@ Component Requirements
    :satisfied_by: comp__persistency_kvs[version==1]
    :tags: inspected
 
-   The component shall not allocate dynamic memory during runtime operations. All memory required for runtime operation shall be allocated during initialization of a KVS instance.
+   The component shall not allocate heap memory after a KVS instance has been successfully created or opened. All memory required for the instance's operation shall be allocated during its opening, with the constraints defined by :need:`comp_req__kvs__constraints`.
 
 .. comp_req:: Multi-Instance
    :id: comp_req__kvs__multi_instance
@@ -76,9 +76,9 @@ Component Requirements
    :satisfied_by: comp__persistency_kvs[version==1]
    :tags: inspected
 
-   The component shall manage all runtime variables within an instance to
-   enable creation and use of multiple KVS instances within a
-   single software architecture element.
+   The component shall support the concurrent existence of multiple KVS
+   instances, such that operations on one instance do not affect the data or
+   state of any other instance.
 
 .. comp_req:: Single Process Access
    :id: comp_req__kvs__single_process_access
@@ -229,7 +229,7 @@ Component Requirements
    :satisfied_by: comp__persistency_kvs[version==1]
    :tags: inspected
 
-   The component shall guarantee that each key is unique.
+   The component shall ensure that keys are unique within a KVS instance and shall report an error when loading storage that contains duplicate keys.
 
 .. comp_req:: Key Value Overwrite
    :id: comp_req__kvs__key_value_overwrite
