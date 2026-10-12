@@ -168,6 +168,16 @@ class Kvs final
      *                 - OpenNeedKvs::Optional: An empty KVS will be used if no KVS exists.
      * @param dir The directory path where the KVS files are located. It is passed as an rvalue
      * reference to avoid unnecessary copying. Use "" or "." for the current directory.
+     * @param snapshot_max_count The maximum number of rotated snapshots to keep in addition to
+     * the current (`_0`) file. A value of `0` disables rotation entirely, so only the `_0` file
+     * ever exists. Defaults to `KVS_MAX_SNAPSHOTS`.
+     * @param read_only When `true`, every mutating operation (`set_value`, `remove_key`,
+     * `remove_all_keys`, `reset`, `reset_key`, `flush`, `snapshot_restore`) returns
+     * `ErrorCode::ReadOnlyViolation` and leaves the KVS and its storage unchanged. Defaults to
+     * `false`.
+     * @param max_storage_size_bytes When set, `flush()` rejects (with
+     * `ErrorCode::StorageSizeExceeded`) any payload whose serialized JSON (excluding the 4-byte
+     * hash file) exceeds this size, writing and rotating nothing. Defaults to unlimited.
      * @return A Result object containing either:
      *         - A Kvs object if the operation is successful.
      *         - An ErrorCode if an error occurs during the operation.
@@ -180,7 +190,10 @@ class Kvs final
                                    const SnapshotId& snapshot_id,
                                    const OpenNeedDefaults& need_defaults,
                                    const OpenNeedKvs& need_kvs,
-                                   const std::string&& dir);
+                                   const std::string&& dir,
+                                   const std::size_t snapshot_max_count = KVS_MAX_SNAPSHOTS,
+                                   const bool read_only = false,
+                                   const std::optional<std::size_t> max_storage_size_bytes = std::nullopt);
 
     /**
      * @brief Resets a key-value-storage to its initial state
@@ -416,6 +429,15 @@ class Kvs final
 
     /* Filename prefix */
     score::filesystem::Path filename_prefix;
+
+    /* Maximum number of rotated snapshots kept in addition to the current (`_0`) file. */
+    std::size_t snapshot_max_count_setting{KVS_MAX_SNAPSHOTS};
+
+    /* When true, every mutating operation is rejected with `ErrorCode::ReadOnlyViolation`. */
+    bool read_only_setting{false};
+
+    /* When set, `flush()` rejects payloads whose serialized JSON exceeds this size. */
+    std::optional<std::size_t> max_storage_size_bytes_setting{std::nullopt};
 
     /* Filesystem handling */
     std::unique_ptr<score::filesystem::Filesystem> filesystem;

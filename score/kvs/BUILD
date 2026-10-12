@@ -26,9 +26,56 @@ docs_bundle(
 )
 
 cc_library(
+    name = "error",
+    srcs = ["error.cpp"],
+    hdrs = ["error.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@score_baselibs//score/result",
+    ],
+)
+
+cc_library(
+    name = "kvs_config_parser",
+    srcs = [
+        "internal/kvs_config_parser.cpp",
+        "internal/kvs_config_parser_factory.cpp",
+    ],
+    hdrs = [
+        "internal/ikvs_config_parser.hpp",
+        "internal/kvs_config_parser.hpp",
+        "internal/kvs_config_parser_factory.hpp",
+        "internal/kvs_config_types.hpp",
+    ],
+    visibility = ["//visibility:private"],
+    deps = [
+        ":error",
+        "@score_baselibs//score/json",
+        "@score_baselibs//score/result",
+    ],
+)
+
+cc_library(
+    name = "kvs_config_parser_mock",
+    testonly = True,
+    srcs = ["internal/kvs_config_parser_mock_factory.cpp"],
+    hdrs = [
+        "internal/ikvs_config_parser.hpp",
+        "internal/kvs_config_parser_factory.hpp",
+        "internal/kvs_config_parser_mock.hpp",
+        "internal/kvs_config_types.hpp",
+    ],
+    visibility = ["//:__pkg__"],
+    deps = [
+        ":error",
+        "@googletest//:gtest",
+        "@score_baselibs//score/result",
+    ],
+)
+
+cc_library(
     name = "kvs",
     srcs = [
-        "error.cpp",
         "internal/kvs_helper.cpp",
         "internal/kvs_helper.hpp",
         "kvs.cpp",
@@ -36,7 +83,6 @@ cc_library(
         "kvsvalue.cpp",
     ],
     hdrs = [
-        "error.hpp",
         "kvs.hpp",
         "kvsbuilder.hpp",
         "kvsvalue.hpp",
@@ -45,6 +91,8 @@ cc_library(
         "//visibility:public",
     ],
     deps = [
+        ":error",
+        ":kvs_config_parser",
         "@score_baselibs//score/filesystem",
         "@score_baselibs//score/json",
         "@score_baselibs//score/mw/log",
@@ -73,12 +121,32 @@ cc_test(
     ],
     visibility = ["//:__pkg__"],
     deps = [
+        ":kvs_config_parser_mock",
         ":kvs",
         "@googletest//:gtest_main",
         "@score_baselibs//score/filesystem",
         "@score_baselibs//score/filesystem:mock",
         "@score_baselibs//score/json:mock",
         "@score_baselibs//score/mw/log:backend_stub_testutil",
+        "@score_baselibs//score/result",
+    ],
+)
+
+cc_test(
+    name = "kvs_config_real_test",
+    size = "small",
+    testonly = True,
+    srcs = [
+        "kvs_config_enforcement_test.cpp",
+        "kvs_config_general_test.hpp",
+        "kvs_config_test.cpp",
+    ],
+    visibility = ["//:__pkg__"],
+    deps = [
+        ":kvs",
+        "@googletest//:gtest_main",
+        "@score_baselibs//score/filesystem",
+        "@score_baselibs//score/json",
         "@score_baselibs//score/result",
     ],
 )

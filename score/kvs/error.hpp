@@ -85,6 +85,15 @@ enum class ErrorCode : score::result::ErrorCode
 
     /* Invalid value type*/
     InvalidValueType,
+
+    /* Invalid configuration (configuration-by-file document malformed or out of range)*/
+    InvalidConfiguration,
+
+    /* Read-only violation (mutating call rejected because the store was opened read-only)*/
+    ReadOnlyViolation,
+
+    /* Storage size exceeded (serialized payload larger than the configured limit)*/
+    StorageSizeExceeded,
 };
 
 /**

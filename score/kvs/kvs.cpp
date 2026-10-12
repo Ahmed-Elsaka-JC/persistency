@@ -43,6 +43,9 @@ Kvs::Kvs()
 
 Kvs::Kvs(Kvs&& other) noexcept
     : filename_prefix(std::move(other.filename_prefix)),
+      snapshot_max_count_setting(other.snapshot_max_count_setting),
+      read_only_setting(other.read_only_setting),
+      max_storage_size_bytes_setting(other.max_storage_size_bytes_setting),
       filesystem(std::move(other.filesystem)),
       parser(std::move(other.parser)) /* Not absolutely necessary, because a new JSON writer/parser
                                          object would also be okay*/
@@ -68,6 +71,9 @@ Kvs& Kvs::operator=(Kvs&& other) noexcept
         }
         default_values.clear();
         filename_prefix = std::move(other.filename_prefix);
+        snapshot_max_count_setting = other.snapshot_max_count_setting;
+        read_only_setting = other.read_only_setting;
+        max_storage_size_bytes_setting = other.max_storage_size_bytes_setting;
 
         {
             std::lock_guard<std::mutex> lock_other(other.kvs_mutex);
@@ -220,7 +226,10 @@ score::Result<Kvs> Kvs::open(const InstanceId& instance_id,
                              const SnapshotId& snapshot_id,
                              const OpenNeedDefaults& need_defaults,
                              const OpenNeedKvs& need_kvs,
-                             const std::string&& dir)
+                             const std::string&& dir,
+                             const std::size_t snapshot_max_count,
+                             const bool read_only,
+                             const std::optional<std::size_t> max_storage_size_bytes)
 {
     score::Result<Kvs> result =
         score::MakeUnexpected(ErrorCode::UnmappedError); /* Redundant initialization needed, since Resul<KVS> would call
@@ -266,9 +275,12 @@ score::Result<Kvs> Kvs::open(const InstanceId& instance_id,
             kvs.kvs = std::move(kvs_res.value());
             kvs.default_values = std::move(default_res.value());
             kvs.filename_prefix = filename_prefix;
+            kvs.snapshot_max_count_setting = snapshot_max_count;
+            kvs.read_only_setting = read_only;
+            kvs.max_storage_size_bytes_setting = max_storage_size_bytes;
             kvs.logger->LogInfo() << "[instance=" << instance_id.id << "]"
                                   << "[snapshot=" << snapshot_id.id << "]"
-                                  << "[maxSnapshotCount=" << KVS_MAX_SNAPSHOTS << "] KVS opened";
+                                  << "[maxSnapshotCount=" << snapshot_max_count << "] KVS opened";
             result = std::move(kvs);
         }
     }
@@ -279,6 +291,10 @@ score::Result<Kvs> Kvs::open(const InstanceId& instance_id,
 /* Reset KVS to initial state*/
 score::Result<void> Kvs::reset()
 {
+    if (read_only_setting)
+    {
+        return score::MakeUnexpected(ErrorCode::ReadOnlyViolation);
+    }
     score::Result<void> result = score::MakeUnexpected(ErrorCode::UnmappedError);
     std::unique_lock<std::mutex> lock(kvs_mutex, std::try_to_lock);
     if (lock.owns_lock())
@@ -390,6 +406,10 @@ score::Result<KvsValue> Kvs::get_default_value(const std::string_view key)
 /* Resets a Key to its default value (Deletes written key if default is available) */
 score::Result<void> Kvs::reset_key(const std::string_view key)
 {
+    if (read_only_setting)
+    {
+        return score::MakeUnexpected(ErrorCode::ReadOnlyViolation);
+    }
     score::Result<void> result = score::MakeUnexpected(ErrorCode::UnmappedError);
     std::unique_lock<std::mutex> lock_kvs(kvs_mutex, std::try_to_lock);
     if (!lock_kvs.owns_lock())
@@ -440,6 +460,10 @@ score::Result<bool> Kvs::is_value_default(const std::string_view key) const
 /* Set the value for a key*/
 score::Result<void> Kvs::set_value(const std::string_view key, const KvsValue& value)
 {
+    if (read_only_setting)
+    {
+        return score::MakeUnexpected(ErrorCode::ReadOnlyViolation);
+    }
     score::Result<void> result = score::MakeUnexpected(ErrorCode::UnmappedError);
     std::unique_lock<std::mutex> lock(kvs_mutex, std::try_to_lock);
     if (lock.owns_lock())
@@ -458,6 +482,10 @@ score::Result<void> Kvs::set_value(const std::string_view key, const KvsValue& v
 /* Remove a key-value pair*/
 score::Result<void> Kvs::remove_key(const std::string_view key)
 {
+    if (read_only_setting)
+    {
+        return score::MakeUnexpected(ErrorCode::ReadOnlyViolation);
+    }
     score::Result<void> result = score::MakeUnexpected(ErrorCode::UnmappedError);
     std::unique_lock<std::mutex> lock(kvs_mutex, std::try_to_lock);
     if (lock.owns_lock())
@@ -482,6 +510,10 @@ score::Result<void> Kvs::remove_key(const std::string_view key)
 
 score::Result<void> Kvs::remove_all_keys()
 {
+    if (read_only_setting)
+    {
+        return score::MakeUnexpected(ErrorCode::ReadOnlyViolation);
+    }
     score::Result<void> result = score::MakeUnexpected(ErrorCode::UnmappedError);
     std::unique_lock<std::mutex> lock(kvs_mutex, std::try_to_lock);
     if (lock.owns_lock())
@@ -608,6 +640,10 @@ score::Result<void> Kvs::write_json_data(const std::string& buf)
 /* Flush the key-value store*/
 score::Result<void> Kvs::flush()
 {
+    if (read_only_setting)
+    {
+        return score::MakeUnexpected(ErrorCode::ReadOnlyViolation);
+    }
     score::Result<void> result = score::MakeUnexpected(ErrorCode::UnmappedError);
     /* Create JSON Object */
     score::json::Object root_obj;
@@ -647,6 +683,12 @@ score::Result<void> Kvs::flush()
         {
             result = score::MakeUnexpected(ErrorCode::JsonGeneratorError);
         }
+        else if (max_storage_size_bytes_setting.has_value() &&
+                 (buf_res.value().size() > max_storage_size_bytes_setting.value()))
+        {
+            /* Payload exceeds the configured limit: reject without rotating or writing anything. */
+            result = score::MakeUnexpected(ErrorCode::StorageSizeExceeded);
+        }
         else
         {
             /* Rotate Snapshots */
@@ -673,7 +715,7 @@ score::Result<size_t> Kvs::snapshot_count() const
     score::Result<size_t> result = score::MakeUnexpected(ErrorCode::UnmappedError);
     size_t count = 0;
     bool error = false;
-    for (size_t idx = 0; idx < KVS_MAX_SNAPSHOTS; ++idx)
+    for (size_t idx = 0; idx < snapshot_max_count_setting; ++idx)
     {
         const score::filesystem::Path fname = filename_prefix.Native() + "_" + to_string(idx) + ".json";
         const auto fname_exists_res = filesystem->standard->Exists(fname);
@@ -706,7 +748,7 @@ score::Result<size_t> Kvs::snapshot_count() const
 /* Retrieve the max snapshot count*/
 size_t Kvs::snapshot_max_count() const
 {
-    return KVS_MAX_SNAPSHOTS;
+    return snapshot_max_count_setting;
 }
 
 /* Rotate Snapshots */
@@ -717,7 +759,7 @@ score::Result<void> Kvs::snapshot_rotate()
     if (lock.owns_lock())
     {
         bool error = false;
-        for (size_t idx = KVS_MAX_SNAPSHOTS; idx > 0; --idx)
+        for (size_t idx = snapshot_max_count_setting; idx > 0; --idx)
         {
             score::filesystem::Path hash_old = filename_prefix.Native() + "_" + to_string(idx - 1) + ".hash";
             score::filesystem::Path hash_new = filename_prefix.Native() + "_" + to_string(idx) + ".hash";
@@ -773,6 +815,10 @@ score::Result<void> Kvs::snapshot_rotate()
 /* Restore the key-value store from a snapshot*/
 score::Result<void> Kvs::snapshot_restore(const SnapshotId& snapshot_id)
 {
+    if (read_only_setting)
+    {
+        return score::MakeUnexpected(ErrorCode::ReadOnlyViolation);
+    }
     score::Result<void> result = score::MakeUnexpected(ErrorCode::UnmappedError);
     std::unique_lock<std::mutex> lock(kvs_mutex, std::try_to_lock);
     if (lock.owns_lock())

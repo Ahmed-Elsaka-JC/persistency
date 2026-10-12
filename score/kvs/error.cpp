@@ -84,6 +84,15 @@ std::string_view KvsErrorDomain::MessageFor(const score::result::ErrorCode& code
         case ErrorCode::InvalidValueType:
             msg = "Invalid value type";
             break;
+        case ErrorCode::InvalidConfiguration:
+            msg = "Invalid configuration";
+            break;
+        case ErrorCode::ReadOnlyViolation:
+            msg = "Read-only violation";
+            break;
+        case ErrorCode::StorageSizeExceeded:
+            msg = "Storage size exceeded";
+            break;
         default:
             msg = "Unknown Error!";
             break;
