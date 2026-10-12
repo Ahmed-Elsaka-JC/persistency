@@ -35,7 +35,6 @@ Component Requirements
    :status: valid
    :version: 1
    :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
 
    The component shall provide API bindings for both the C++ and Rust programming languages.
 
@@ -48,7 +47,6 @@ Component Requirements
    :status: valid
    :version: 1
    :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
 
    The component shall access operating system services exclusively through an operating system abstraction layer.
 
@@ -61,7 +59,6 @@ Component Requirements
    :status: valid
    :version: 1
    :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
 
    The component shall not allocate heap memory after a KVS instance has been successfully created or opened. All memory required for the instance's operation shall be allocated during its opening, with the constraints defined by :need:`comp_req__kvs__constraints`.
 
@@ -74,7 +71,6 @@ Component Requirements
    :status: valid
    :version: 1
    :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
 
    The component shall support the concurrent existence of multiple KVS
    instances, such that operations on one instance do not affect the data or
@@ -89,7 +85,6 @@ Component Requirements
    :status: valid
    :version: 1
    :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
 
    The component shall prevent a single KVS instance from being opened concurrently by more than one OS process.
 
@@ -131,7 +126,6 @@ Component Requirements
    :status: valid
    :version: 1
    :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
 
    The component shall create storage files with file permissions ``640`` (owner read and write, group read, others none).
 
@@ -144,7 +138,6 @@ Component Requirements
    :status: valid
    :version: 1
    :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
 
    The component shall generate the default-values storage file, via the provided kvs tool, with read-only file permissions ``440`` (owner and group read, others none), so that the default storage deployed with the application cannot be modified at runtime.
 
@@ -171,7 +164,6 @@ Component Requirements
    :status: valid
    :version: 1
    :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
 
    The component shall give configurations provided by file higher priority than compile-time configurations.
 
@@ -240,7 +232,6 @@ Component Requirements
    :status: valid
    :version: 1
    :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
 
    The component shall overwrite the existing value with the new value when a value is set for a key that already exists.
 
@@ -448,7 +439,6 @@ Component Requirements
    :status: valid
    :version: 1
    :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
 
    The component shall perform flush operations such that the previously persisted consistent data remains intact until a new flush operation has completed successfully.
 
@@ -461,7 +451,6 @@ Component Requirements
    :status: valid
    :version: 1
    :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
 
    The component shall detect an interrupted or corrupted storage file, via its integrity check, when a KVS instance is opened, and shall not automatically load the affected storage.
 
@@ -474,7 +463,6 @@ Component Requirements
    :status: valid
    :version: 1
    :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
 
    The component shall behave according to the ``Need Kvs`` configuration parameter (represented by the ``OpenNeedKvs`` flag) when opening a KVS instance whose storage is missing or fails the integrity check:
 
@@ -491,7 +479,6 @@ Component Requirements
    :status: valid
    :version: 1
    :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
 
    The component shall allow the user to explicitly restore a snapshot of their choice in order to recover the data after an interrupted or corrupted storage has been detected.
 
@@ -504,7 +491,6 @@ Component Requirements
    :status: valid
    :version: 1
    :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
 
    The component shall persist all key-value pairs of a flush operation atomically, such that either all changes are written or none are.
 
@@ -517,7 +503,6 @@ Component Requirements
    :status: valid
    :version: 1
    :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
 
    The component shall persist in-memory key-value changes to storage only when the user explicitly calls the flush operation, and shall not flush automatically.
 
@@ -530,7 +515,6 @@ Component Requirements
    :status: valid
    :version: 1
    :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
 
    The component shall write key-value data to the storage backend only when the in-memory data has changed since the last successful flush operation.
 
@@ -543,7 +527,6 @@ Component Requirements
    :status: valid
    :version: 1
    :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
 
    The component shall hold key-value pairs in an in-memory cache and shall serve read and write access to key-value pairs from that cache.
 
@@ -633,7 +616,6 @@ Component Requirements
    :status: valid
    :version: 1
    :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
 
    The component shall allow the storage backend used by a KVS instance to be selected via a compile-time configuration parameter.
 
@@ -850,7 +832,6 @@ Component Requirements
    :status: valid
    :version: 1
    :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
 
    The component shall migrate persisted data between supported schema versions
    without involvement of the application.
@@ -864,7 +845,6 @@ Component Requirements
    :status: valid
    :version: 1
    :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
 
    The component shall provide random read access to a key-value pair with at most logarithmic time complexity relative to the number of stored key-value pairs.
 
@@ -877,7 +857,6 @@ Component Requirements
    :status: valid
    :version: 1
    :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
 
    The component shall provide a tool to generate the default value storage file and its corresponding checksum file.
 
@@ -890,7 +869,6 @@ Component Requirements
    :status: valid
    :version: 1
    :satisfied_by: comp__persistency_kvs[version==1]
-   :tags: inspected
 
    The component shall provide a tool to view, modify and validate storage files.
 
