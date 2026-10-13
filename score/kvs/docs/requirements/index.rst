@@ -20,7 +20,7 @@ Requirements
    :status: valid
    :version: 1
    :safety: ASIL_B
-   :security: NO
+   :security: YES
    :realizes: wp__requirements_comp[version==1]
 
 Component Requirements
@@ -69,7 +69,7 @@ Component Requirements
    :safety: QM
    :derived_from: feat_req__persistency__multiple_kvs[version==1]
    :status: valid
-   :version: 1
+   :version: 2
    :satisfied_by: comp__persistency_kvs[version==1]
 
    The component shall support the concurrent existence of multiple KVS
@@ -217,7 +217,7 @@ Component Requirements
    :safety: ASIL_B
    :derived_from: feat_req__persistency__support_datatype_keys[version==1]
    :status: valid
-   :version: 1
+   :version: 2
    :satisfied_by: comp__persistency_kvs[version==1]
    :tags: inspected
 
@@ -291,7 +291,7 @@ Component Requirements
    :safety: ASIL_B
    :derived_from: feat_req__persistency__support_datatype_value[version==1]
    :status: valid
-   :version: 1
+   :version: 2
    :satisfied_by: comp__persistency_kvs[version==1]
    :tags: inspected
 
@@ -342,7 +342,7 @@ Component Requirements
    :safety: ASIL_B
    :derived_from: feat_req__persistency__support_datatype_value[version==1],feat_req__persistency__default_values[version==1],feat_req__persistency__default_value_get[version==1]
    :status: valid
-   :version: 1
+   :version: 2
    :satisfied_by: comp__persistency_kvs[version==1]
    :tags: inspected
 
@@ -371,7 +371,7 @@ Component Requirements
    :safety: ASIL_B
    :derived_from: feat_req__persistency__default_values[version==1],feat_req__persistency__support_datatype_value[version==1]
    :status: valid
-   :version: 1
+   :version: 2
    :satisfied_by: comp__persistency_kvs[version==1]
    :tags: inspected
 
@@ -384,7 +384,7 @@ Component Requirements
    :safety: ASIL_B
    :derived_from: feat_req__persistency__default_values[version==1],feat_req__persistency__default_value_get[version==1]
    :status: valid
-   :version: 1
+   :version: 2
    :satisfied_by: comp__persistency_kvs[version==1]
    :tags: inspected
 
@@ -409,7 +409,7 @@ Component Requirements
    :safety: ASIL_B
    :derived_from: feat_req__persistency__default_values[version==1],feat_req__persistency__default_value_file[version==1]
    :status: valid
-   :version: 1
+   :version: 2
    :satisfied_by: comp__persistency_kvs[version==1]
    :tags: inspected
 
@@ -575,7 +575,7 @@ Component Requirements
    :safety: ASIL_B
    :derived_from: feat_req__persistency__integrity_check[version==1],feat_req__persistency__load_data[version==1]
    :status: valid
-   :version: 1
+   :version: 2
    :satisfied_by: comp__persistency_kvs[version==1]
    :tags: inspected
 
@@ -626,7 +626,7 @@ Component Requirements
    :safety: ASIL_B
    :derived_from: feat_req__persistency__async_api[version==1]
    :status: valid
-   :version: 1
+   :version: 2
    :satisfied_by: comp__persistency_kvs[version==1]
    :tags: inspected
 
@@ -713,11 +713,12 @@ Component Requirements
    :safety: ASIL_B
    :derived_from: feat_req__persistency__snapshot_create[version==1]
    :status: valid
-   :version: 1
+   :version: 2
    :satisfied_by: comp__persistency_kvs[version==1]
    :tags: valid
 
-   The component shall identify snapshot slots by a one-based index, where the first slot has index 1, the second slot has index 2, and so on.
+   The component shall identify snapshot slots by a one-based index in the range ``<1..3>``, where the first slot has index ``1``, the second slot has index ``2`` and the third slot has index ``3``.
+   See :need:`comp_req__kvs__snapshot_max_num_cfg`.
 
 .. comp_req:: Snapshot Data Source
    :id: comp_req__kvs__snapshot_source
@@ -801,7 +802,7 @@ Component Requirements
    :safety: ASIL_B
    :derived_from: feat_req__persistency__versioning[version==1],feat_req__persistency__update_mechanism[version==1]
    :status: valid
-   :version: 1
+   :version: 2
    :satisfied_by: comp__persistency_kvs[version==1]
    :tags: inspected
 
@@ -815,7 +816,7 @@ Component Requirements
    :safety: ASIL_B
    :derived_from: feat_req__persistency__versioning[version==1],feat_req__persistency__update_mechanism[version==1]
    :status: valid
-   :version: 1
+   :version: 2
    :satisfied_by: comp__persistency_kvs[version==1]
    :tags: inspected
 
