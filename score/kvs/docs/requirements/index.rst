@@ -656,11 +656,8 @@ Component Requirements
    :satisfied_by: comp__persistency_kvs[version==1]
    :tags: valid
 
-   The component shall provide an API for creating snapshots.
-   The API shall accept an argument that selects a snapshot slot by index.
-   The snapshot slot shall be in range ``<1..3>``.
-   The API shall return an error when provided slot index is out of range or provided slot index is zero.
-   See :need:`comp_req__kvs__snapshot_max_num_cfg`.
+   The component shall provide an API for creating a snapshot in the slot selected by index.
+   See :need:`comp_req__kvs__snapshot_id_api` and :need:`comp_req__kvs__snapshot_slot_index_vali`.
 
 
    .. note::
@@ -720,6 +717,18 @@ Component Requirements
    The component shall identify snapshot slots by a one-based index in the range ``<1..3>``, where the first slot has index ``1``, the second slot has index ``2`` and the third slot has index ``3``.
    See :need:`comp_req__kvs__snapshot_max_num_cfg`.
 
+.. comp_req:: Snapshot Slot Index Validation
+   :id: comp_req__kvs__snapshot_slot_index_vali
+   :reqtype: Functional
+   :security: NO
+   :safety: ASIL_B
+   :derived_from: feat_req__persistency__snapshot_create[version==1]
+   :status: valid
+   :version: 1
+   :satisfied_by: comp__persistency_kvs[version==1]
+
+   The component shall return an error from every snapshot API that accepts a slot index when the provided index is zero or outside the range defined in :need:`comp_req__kvs__snapshot_id_api`.
+
 .. comp_req:: Snapshot Data Source
    :id: comp_req__kvs__snapshot_source
    :reqtype: Functional
@@ -745,8 +754,8 @@ Component Requirements
    :satisfied_by: comp__persistency_kvs[version==1]
    :tags: valid
 
-   The component shall provide an API to check whether a slot identified by a snapshot index is free or occupied.
-   The API shall return an error when provided slot index is out of range. See :need:`comp_req__kvs__snapshot_create_api`.
+   The component shall provide an API to check whether the slot selected by index is free or occupied.
+   See :need:`comp_req__kvs__snapshot_slot_index_vali`.
 
 .. comp_req:: Snapshot Restore API
    :id: comp_req__kvs__snapshot_restore_api
@@ -759,10 +768,8 @@ Component Requirements
    :satisfied_by: comp__persistency_kvs[version==1]
    :tags: valid
 
-   The component shall provide an API for restoring snapshots.
-   The API shall accept an argument that selects a snapshot slot by index.
-   The function shall return an error when the referenced snapshot slot is free.
-   The API shall return an error when provided slot index is out of range. See :need:`comp_req__kvs__snapshot_create_api`.
+   The component shall provide an API for restoring the snapshot in the slot selected by index, and shall return an error when that slot is free.
+   See :need:`comp_req__kvs__snapshot_slot_index_vali`.
 
 .. comp_req:: Snapshot Remove API
    :id: comp_req__kvs__snapshot_remove_api
@@ -775,10 +782,8 @@ Component Requirements
    :satisfied_by: comp__persistency_kvs[version==1]
    :tags: valid
 
-   The component shall provide an API for removing snapshots.
-   The API shall accept an argument that selects a snapshot slot by index.
-   The function shall return an error when the referenced slot is free.
-   The API shall return an error when provided slot index is out of range. See :need:`comp_req__kvs__snapshot_create_api`.
+   The component shall provide an API for removing the snapshot in the slot selected by index, and shall return an error when that slot is free.
+   See :need:`comp_req__kvs__snapshot_slot_index_vali`.
 
 
 .. comp_req:: Concurrency
