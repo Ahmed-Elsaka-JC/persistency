@@ -15,7 +15,7 @@
 
 .. document:: KVS Requirements Inspection Checklist
    :id: doc__kvs_req_inspection
-   :status: valid
+   :status: invalid
    :version: 1
    :safety: ASIL_B
    :security: YES
