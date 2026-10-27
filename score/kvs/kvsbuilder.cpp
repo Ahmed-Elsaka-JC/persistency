@@ -129,7 +129,7 @@ score::Result<Kvs> KvsBuilder::build() noexcept
         }
         if (entry.max_storage_size_bytes.has_value())
         {
-            maximum_storage_bytes_ = entry.max_storage_size_bytes.value();
+            maximum_storage_bytes_ = entry.max_storage_size_bytes;
         }
     }
 
